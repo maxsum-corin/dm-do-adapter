@@ -747,7 +747,7 @@ module DataMapper
 
         # @api private
         def quote_name(name)
-          "\"#{name[0, self.class::IDENTIFIER_MAX_LENGTH].gsub('"', '""')}\""
+          "\"#{name.to_s[0, self.class::IDENTIFIER_MAX_LENGTH].gsub('"', '""')}\""
         end
 
       end
