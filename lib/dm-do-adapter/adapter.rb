@@ -132,7 +132,7 @@ module DataMapper
       # @api semipublic
       def read(query)
         fields = query.fields
-        types  = fields.map { |property| property.primitive }
+        types  = fields.map { |property| property.dump_class }
 
         statement, bind_values = select_statement(query)
 
@@ -229,14 +229,14 @@ module DataMapper
             port = @options[:port].nil? ? nil : @options[:port].to_int
 
             DataObjects::URI.new(
-              @options[:adapter],
-              @options[:user] || @options[:username],
-              @options[:password],
-              @options[:host],
-              port,
-              @options[:path] || @options[:database],
-              query,
-              @options[:fragment]
+              :scheme     => @options[:adapter],
+              :user       => @options[:user] || @options[:username],
+              :password   => @options[:password],
+              :host       => @options[:host],
+              :port       => port,
+              :path       => @options[:path] || @options[:database],
+              :query      => query,
+              :fragment   => @options[:fragment]
             ).freeze
           end
       end
