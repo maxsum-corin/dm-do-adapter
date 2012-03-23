@@ -111,7 +111,27 @@ module DataMapper
           statement = insert_statement(model, properties, serial)
 
           result = with_connection do |connection|
-            connection.create_command(statement).execute_non_query(*bind_values)
+            result = connection.create_command(statement).execute_non_query(*bind_values)
+            if result.affected_rows == 1 and serial and result.insert_id == 0
+              indentity_queries = [
+                %Q{SELECT IDENT_CURRENT('#{model.storage_name}')},
+                %Q{SELECT TOP (1) "ID" FROM "IDENTIFIERS" WHERE "TABLENAME"='#{model.storage_name}' AND "FIELDNAME"='#{model.serial.field}'}
+              ]
+              indentity_queries.each do |query|
+                begin
+                  reader = connection.create_command(query).execute_reader
+                  begin
+                    reader.next
+                    result.insert_id = reader.values[0].to_i
+                  ensure
+                    reader.close
+                  end
+                  break if result.insert_id > 0
+                rescue
+                end
+              end
+            end
+            result
           end
 
           if result.affected_rows == 1 && serial
