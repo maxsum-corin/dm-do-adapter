@@ -121,8 +121,7 @@ module DataMapper
                 begin
                   reader = connection.create_command(query).execute_reader
                   begin
-                    reader.next
-                    result.insert_id = reader.values[0].to_i
+                    result.insert_id = reader.values[0].to_i if reader.next!
                   ensure
                     reader.close
                   end
